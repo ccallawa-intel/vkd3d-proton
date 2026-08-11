@@ -1077,6 +1077,10 @@ static HRESULT STDMETHODCALLTYPE d3d12_dxvk_interop_device_BeginVkCommandBufferI
 
     d3d12_command_list_decay_tracked_state(cmd_list);
     d3d12_command_list_invalidate_all_state(cmd_list);
+    /* Vulkan state (including descriptor buffer bindings) is unknown after
+     * the interop block; force re-emission of vkCmdBindDescriptorBuffersEXT. */
+    if (d3d12_device_uses_descriptor_buffers(cmd_list->device))
+        cmd_list->descriptor_heap.buffers.global_heap_dirty = true;
 
     *cmdBuf = cmd_list->cmd.vk_command_buffer;
 
